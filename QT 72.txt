@@ -1,0 +1,48 @@
+QT 72:	ĐO HOẠT ĐỘ G6PD
+(Glucose -6 phosphat dehydrogenase)
+
+I.	NGUYÊN LÝ
+Hoạt độ Enzym được xác định bằng cách đo tốc độ tăng mật độ quang ở bước sóng 340nm do sự tăng nồng độ của N DPH.
+G-6-P + NADP	--- > gluconate-6-P + NADPH + H+
+
+II.	CHUẨN BỊ
+1.	Người thực hiện
+02 người là bác sĩ, kỹ thuật viên được đào tạo chuyên ngành Hóa sinh.
+2.	Phương tiện, hóa chất
+-	Máy hóa sinh tự động Beckman Coulter AU2700 hoặc AU640
+-	Máy ly tâm
+-	Hóa chất làm xét nghiệm G6PD của hãng Randox
+-	QC kiểm tra mức bình thường
+-	QC kiểm tra mức bệnh lý
+-	Nước muối sinh lý
+3.	Người bệnh
+4.	Phiếu xét nghiệm
+Ghi đầy đủ thông tin cần thiết: họ tên người bệnh, tuổi, mã số người bệnh, khoa phòng, tên xét nghiệm chỉ định, khoảng tham chiếu, bác sĩ chỉ định xét nghiệm, ngày giờ lấy mẫu, người lấy mẫu, ngày giờ nhận mẫu bệnh phẩm, người nhận mẫu.
+
+III.	CÁC BƯỚC TIẾN HÀNH
+1.	Lấy bệnh phẩm
+Máu toàn phần chống đông với EDT , Heparine hoặc CD ( cid Citric Dextrose). G6PD trong máu toàn phần ổn định 1 tuần ở 2-8oC C, không ổn định trong dịch huyết tán. Không được để đông đá.
+2.	Tiến hành kỹ thuật
+-	Rửa hồng cầu:
+Lấy 0,2 ml máu toàn phần cho thêm vào 3ml nước muối sinh lý. Ly tâm 3000 vòng trong 10 phút.
+Hút hết nước muối ở trên, rửa thêm 2 lần nữa. Hút hết nước muối. 
+Phá vỡ hồng cầu bằng 0,5ml dung dịch phá vỡ hồng cầu.
+Lắc bằng máy lắc. Để 15 phút ở 2 - 8oC. Ly tâm hút dịch phía trên.
+-	Chạy phân tích trên máy hoá sinh tự động: Đặt vào Rach và cho vào máy sinh hóa tự động.
+-	Tính toán kết quả: Chia kết quả đo được trên máy cho số lượng hồng cầu trong 1 L máu hoặc hàm lượng Hb trong 1 L máu.
+-	Kiểm soát chất lượng:
++ Hàng ngày: Chạy 2 mức kiểm QC tra chất lượng mỗi khi phân tích mẫu bệnh phẩm. Tất cả các kết quả kiểm tra chất lượng phải được ghi lại trong bảng theo dõi QC. Chỉ thông báo kết quả xét nghiệm nếu cả hai mức QC nằm trong khoảng cho phép.
++ Định kỳ: Chạy 2 mức QC sau khi thay lô thuốc thử mới hoặc sau khi bảo dưỡng, sửa chữa máy do sự cố, thay thế trang thiết bị phân tích quan trọng. Ghi lại kết quả vào bảng theo dõi chuẩn máy xét nghiệm.
+
+IV.	NHẬN ĐỊNH KẾT QUẢ
+1.	Giá trị tham chiếu
+Hoạt độ G6PD hồng cầu: > 200 IU/1012Hồng cầu hoặc > 6.0 IU/gHb
+2.	Ý nghĩa lâm sàng
+-	Thiếu hụt G6PD là một rối loạn Enzym liên quan giới tính. Có hơn 500 biến thể của bệnh này (Nhiễm sắc thể X )
+-	G6PD còn giảm trong bệnh thiếu máu hồng cầu hình cầu hiếm gặp và các bệnh huyết tán không do miễn dịch ở trẻ sơ sinh.
+-	G6PD tăng trong các bệnh:Thiếu máu ác tính,xuất huyết..tự phát, hôn mê gan, cường giáp, nhồi máu cơ tim, bệnh máu mạn tính và các bệnh thiếu máu nguyên hồng cầu khổng lồ khác.
+
+V.	NHỮNG SAI SÓT VÀ XỬ TRÍ.
+-	Lưu ý các yếu tố ảnh hưởng như đồng, sulphat là những chất ức chế mạnh.
+-	Hồng cầu lưới có hoạt độ enzyme G6PD cao hơn hồng cầu trưởng thành vì vậy không nên làm xét nghiệm này sau một cơn tan máu nặng.
+
