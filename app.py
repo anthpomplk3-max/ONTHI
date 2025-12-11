@@ -1,7 +1,7 @@
 import streamlit as st
-import os
-import base64
+# ... các thư viện khác
 from pydub import AudioSegment
+# ... code tiếp theo
 
 # --- CẤU HÌNH TRANG ---
 st.set_page_config(page_title="QT Audio Player Pro", page_icon="🎧", layout="wide")
@@ -185,3 +185,4 @@ if st.session_state.current_qt:
 
 else:
     st.write("Vui lòng tải file lên server hoặc đặt vào thư mục chạy ứng dụng.")
+
