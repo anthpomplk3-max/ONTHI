@@ -1,188 +1,238 @@
-import streamlit as st
-# ... các thư viện khác
-from pydub import AudioSegment
-# ... code tiếp theo
+import tkinter as tk
+from tkinter import ttk, filedialog, messagebox, scrolledtext
+import pygame
+import os
+import threading
+import time
 
-# --- CẤU HÌNH TRANG ---
-st.set_page_config(page_title="QT Audio Player Pro", page_icon="🎧", layout="wide")
-
-# --- CÁC HÀM XỬ LÝ ---
-
-def get_audio_duration(audio_file):
-    """Lấy độ dài file âm thanh (giây)"""
-    try:
-        audio = AudioSegment.from_file(audio_file)
-        return len(audio) / 1000.0
-    except Exception as e:
-        st.error(f"Không đọc được độ dài audio. Hãy cài đặt ffmpeg. Lỗi: {e}")
-        return 0
-
-def load_text_lines(txt_file):
-    """Đọc file text và trả về danh sách dòng"""
-    try:
-        with open(txt_file, 'r', encoding='utf-8') as f:
-            lines = [line.strip() for line in f.readlines() if line.strip()]
-        return lines
-    except:
-        # Thử encoding khác nếu utf-8 lỗi
-        try:
-            with open(txt_file, 'r', encoding='latin-1') as f:
-                lines = [line.strip() for line in f.readlines() if line.strip()]
-            return lines
-        except:
-            return ["Lỗi đọc file văn bản."]
-
-def get_binary_file_downloader_html(bin_file, file_label='File'):
-    with open(bin_file, 'rb') as f:
-        data = f.read()
-    bin_str = base64.b64encode(data).decode()
-    return bin_str
-
-# --- LOGIC TÌM FILE ---
-def check_files():
-    """Kiểm tra các cặp file QT có sẵn trong thư mục"""
-    available_files = {}
-    target_numbers = [58, 72, 83, 85] # Danh sách file yêu cầu
-    
-    files_in_dir = os.listdir('.')
-    
-    for num in target_numbers:
-        # Các biến thể tên file có thể gặp
-        patterns = [
-            (f"QT {num}.mp3", f"QT {num}.txt"),
-            (f"QT{num}.mp3", f"QT{num}.txt"),
-            (f"qt {num}.mp3", f"qt {num}.txt")
+class AudioPlayerApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Audio Player with Text Display")
+        self.root.geometry("1000x700")
+        
+        # Initialize pygame mixer
+        pygame.mixer.init()
+        
+        # Variables
+        self.audio_files = [
+            "QT 5.8.mp3", "QT 7.2.mp3", "QT 8.8.mp3", "QT 8.8.mp3"
         ]
+        self.text_files = [
+            "QT 5.8.txt", "QT 7.2.txt", "QT 8.8.txt", "QT 8.8.txt"
+        ]
+        self.current_track = 0
+        self.playing = False
+        self.paused = False
+        self.volume = 0.7
+        self.speed = 1.0
         
-        for mp3_name, txt_name in patterns:
-            if mp3_name in files_in_dir and txt_name in files_in_dir:
-                available_files[num] = {'mp3': mp3_name, 'txt': txt_name}
-                break
-    
-    return available_files
-
-# --- GIAO DIỆN CHÍNH ---
-
-st.title("🎧 Trình phát Audio QT: 58, 72, 83, 85")
-st.markdown("---")
-
-# 1. Sidebar chọn bài
-available_files = check_files()
-
-with st.sidebar:
-    st.header("📂 Danh sách bài")
-    
-    if not available_files:
-        st.warning("⚠️ Không tìm thấy file QT (mp3/txt) nào.")
-        st.info("Vui lòng copy các file `QT 58.mp3`, `QT 58.txt`... vào cùng thư mục với file code này.")
-    
-    selected_qt = st.radio(
-        "Chọn bài học:",
-        options=list(available_files.keys()),
-        format_func=lambda x: f"Bài QT {x}",
-        index=0 if available_files else None
-    )
-
-    st.markdown("---")
-    st.markdown("**Hướng dẫn:**")
-    st.caption("1. Chọn bài học bên trên.")
-    st.caption("2. Bấm vào dòng văn bản để nhảy Audio đến đoạn đó.")
-    st.caption("3. Điều chỉnh tốc độ nếu nghe không kịp.")
-
-# Khởi tạo biến Session State
-if 'current_qt' not in st.session_state:
-    st.session_state.current_qt = None
-if 'start_time' not in st.session_state:
-    st.session_state.start_time = 0
-if 'highlight_line' not in st.session_state:
-    st.session_state.highlight_line = -1
-
-# Nếu người dùng đổi bài
-if selected_qt and selected_qt != st.session_state.current_qt:
-    st.session_state.current_qt = selected_qt
-    st.session_state.start_time = 0
-    st.session_state.highlight_line = -1
-    st.rerun()
-
-# --- XỬ LÝ NỘI DUNG ---
-if st.session_state.current_qt:
-    files = available_files[st.session_state.current_qt]
-    
-    # Load dữ liệu
-    lines = load_text_lines(files['txt'])
-    duration = get_audio_duration(files['mp3'])
-    
-    # Tính thời gian trung bình mỗi dòng (Ước lượng để map dòng -> thời gian)
-    if len(lines) > 0 and duration > 0:
-        time_per_line = duration / len(lines)
-    else:
-        time_per_line = 0
-
-    # --- KHU VỰC PLAYER & ĐIỀU KHIỂN ---
-    col_player, col_settings = st.columns([3, 1])
-    
-    with col_settings:
-        st.subheader("⚙️ Cài đặt")
-        playback_rate = st.select_slider(
-            "Tốc độ phát (Speed):",
-            options=[0.5, 0.75, 1.0, 1.25, 1.5, 2.0],
-            value=1.0
-        )
+        # Setup GUI
+        self.setup_ui()
         
-    with col_player:
-        st.subheader(f"Đang phát: {files['mp3']}")
+        # Load first track
+        self.load_track(0)
+    
+    def setup_ui(self):
+        # Create main frames
+        control_frame = ttk.LabelFrame(self.root, text="Controls", padding=10)
+        control_frame.pack(fill="x", padx=10, pady=5)
         
-        # Đọc file audio để nhúng vào HTML
-        audio_base64 = get_binary_file_downloader_html(files['mp3'])
+        display_frame = ttk.LabelFrame(self.root, text="Text Display", padding=10)
+        display_frame.pack(fill="both", expand=True, padx=10, pady=5)
         
-        # Tạo Audio Player HTML tùy chỉnh với JS để xử lý seek và speed
-        # Lưu ý: autoplay=True để khi bấm dòng văn bản nó tự phát ngay
-        audio_html = f"""
-            <audio id="audioPlayer" controls autoplay style="width: 100%;">
-                <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
-            </audio>
+        # Control buttons
+        btn_style = ttk.Style()
+        btn_style.configure('Control.TButton', font=('Arial', 10))
+        
+        self.play_btn = ttk.Button(control_frame, text="▶ Play", command=self.play, style='Control.TButton')
+        self.play_btn.grid(row=0, column=0, padx=5, pady=5)
+        
+        self.pause_btn = ttk.Button(control_frame, text="⏸ Pause", command=self.pause, style='Control.TButton')
+        self.pause_btn.grid(row=0, column=1, padx=5, pady=5)
+        
+        self.stop_btn = ttk.Button(control_frame, text="⏹ Stop", command=self.stop, style='Control.TButton')
+        self.stop_btn.grid(row=0, column=2, padx=5, pady=5)
+        
+        self.prev_btn = ttk.Button(control_frame, text="⏮ Previous", command=self.prev_track, style='Control.TButton')
+        self.prev_btn.grid(row=0, column=3, padx=5, pady=5)
+        
+        self.next_btn = ttk.Button(control_frame, text="⏭ Next", command=self.next_track, style='Control.TButton')
+        self.next_btn.grid(row=0, column=4, padx=5, pady=5)
+        
+        # Volume control
+        ttk.Label(control_frame, text="Volume:").grid(row=1, column=0, sticky="w", padx=5)
+        self.volume_scale = ttk.Scale(control_frame, from_=0, to=100, 
+                                      command=self.set_volume, orient="horizontal")
+        self.volume_scale.set(70)
+        self.volume_scale.grid(row=1, column=1, columnspan=3, sticky="ew", padx=5, pady=10)
+        
+        # Speed control
+        ttk.Label(control_frame, text="Speed:").grid(row=1, column=4, sticky="w", padx=5)
+        self.speed_scale = ttk.Scale(control_frame, from_=0.5, to=2.0, 
+                                     command=self.set_speed, orient="horizontal")
+        self.speed_scale.set(1.0)
+        self.speed_scale.grid(row=1, column=5, sticky="ew", padx=5, pady=10)
+        
+        # Track info
+        info_frame = ttk.Frame(control_frame)
+        info_frame.grid(row=2, column=0, columnspan=6, sticky="ew", pady=10)
+        
+        self.track_label = ttk.Label(info_frame, text="Track: 0/0", font=('Arial', 10, 'bold'))
+        self.track_label.pack(side="left", padx=10)
+        
+        self.time_label = ttk.Label(info_frame, text="00:00 / 00:00", font=('Arial', 10))
+        self.time_label.pack(side="right", padx=10)
+        
+        # Track list
+        list_frame = ttk.LabelFrame(self.root, text="Playlist", padding=10)
+        list_frame.pack(fill="x", padx=10, pady=5)
+        
+        self.track_listbox = tk.Listbox(list_frame, height=5, font=('Arial', 10))
+        self.track_listbox.pack(fill="x", padx=5, pady=5)
+        
+        for i, (audio, text) in enumerate(zip(self.audio_files, self.text_files)):
+            self.track_listbox.insert(tk.END, f"{i+1}. {audio} / {text}")
+        
+        self.track_listbox.bind('<<ListboxSelect>>', self.on_track_select)
+        
+        # Text display area
+        self.text_display = scrolledtext.ScrolledText(display_frame, 
+                                                     wrap=tk.WORD, 
+                                                     font=('Arial', 12),
+                                                     bg='#f0f0f0',
+                                                     padx=10,
+                                                     pady=10)
+        self.text_display.pack(fill="both", expand=True)
+        
+        # Status bar
+        self.status_bar = ttk.Label(self.root, text="Ready", relief=tk.SUNKEN, anchor=tk.W)
+        self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
+    
+    def load_track(self, index):
+        if 0 <= index < len(self.audio_files):
+            self.current_track = index
+            self.track_listbox.selection_clear(0, tk.END)
+            self.track_listbox.selection_set(index)
+            self.track_listbox.activate(index)
             
-            <script>
-                var audio = document.getElementById("audioPlayer");
+            # Update track info
+            self.track_label.config(text=f"Track: {index + 1}/{len(self.audio_files)} - {self.audio_files[index]}")
+            
+            # Load and display text file
+            try:
+                text_file = self.text_files[index]
+                if os.path.exists(text_file):
+                    with open(text_file, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    self.text_display.delete(1.0, tk.END)
+                    self.text_display.insert(1.0, content)
+                    self.status_bar.config(text=f"Loaded: {self.audio_files[index]} and {text_file}")
+                else:
+                    self.text_display.delete(1.0, tk.END)
+                    self.text_display.insert(1.0, f"Text file not found: {text_file}")
+                    self.status_bar.config(text=f"Text file not found: {text_file}")
+            except Exception as e:
+                self.text_display.delete(1.0, tk.END)
+                self.text_display.insert(1.0, f"Error loading text file: {str(e)}")
+                self.status_bar.config(text=f"Error: {str(e)}")
+    
+    def play(self):
+        if not self.playing:
+            try:
+                pygame.mixer.music.load(self.audio_files[self.current_track])
+                pygame.mixer.music.set_volume(self.volume)
+                pygame.mixer.music.play()
+                self.playing = True
+                self.paused = False
+                self.play_btn.config(text="⏸ Pause", command=self.pause)
+                self.status_bar.config(text=f"Playing: {self.audio_files[self.current_track]}")
                 
-                // Thiết lập tốc độ
-                audio.playbackRate = {playback_rate};
-                
-                // Thiết lập thời gian bắt đầu (nếu có yêu cầu seek)
-                // Chỉ set currentTime 1 lần khi load để tránh loop
-                var setTime = {st.session_state.start_time};
-                if(setTime > 0) {{
-                    audio.currentTime = setTime;
-                    audio.play(); 
-                }}
-            </script>
-        """
-        st.components.v1.html(audio_html, height=60)
-
-    # --- KHU VỰC VĂN BẢN (CLICK ĐỂ NGHE) ---
-    st.subheader("📝 Nội dung bài học (Kích vào dòng để nghe)")
+                # Start time update thread
+                threading.Thread(target=self.update_time, daemon=True).start()
+            except Exception as e:
+                messagebox.showerror("Error", f"Could not play audio file: {str(e)}")
+        elif self.paused:
+            pygame.mixer.music.unpause()
+            self.paused = False
+            self.play_btn.config(text="⏸ Pause", command=self.pause)
+            self.status_bar.config(text=f"Resumed: {self.audio_files[self.current_track]}")
     
-    # Container cuộn cho văn bản
-    with st.container(height=600):
-        for idx, line in enumerate(lines):
-            # Tính toán style: Nếu là dòng đang chọn -> Highlight
-            is_active = (idx == st.session_state.highlight_line)
-            
-            # Sử dụng st.button để làm dòng văn bản có thể click được
-            # Nếu active, dùng type="primary" để đổi màu
-            btn_type = "primary" if is_active else "secondary"
-            
-            # Logic click:
-            if st.button(f"{idx + 1}. {line}", key=f"line_{idx}", use_container_width=True, type=btn_type):
-                # Khi click vào dòng:
-                # 1. Tính thời gian tương ứng
-                new_time = idx * time_per_line
-                # 2. Cập nhật state
-                st.session_state.start_time = new_time
-                st.session_state.highlight_line = idx
-                # 3. Rerun để Player nhận start_time mới trong HTML
-                st.rerun()
+    def pause(self):
+        if self.playing and not self.paused:
+            pygame.mixer.music.pause()
+            self.paused = True
+            self.play_btn.config(text="▶ Resume", command=self.play)
+            self.status_bar.config(text=f"Paused: {self.audio_files[self.current_track]}")
+    
+    def stop(self):
+        pygame.mixer.music.stop()
+        self.playing = False
+        self.paused = False
+        self.play_btn.config(text="▶ Play", command=self.play)
+        self.time_label.config(text="00:00 / 00:00")
+        self.status_bar.config(text="Stopped")
+    
+    def set_volume(self, val):
+        self.volume = float(val) / 100
+        if pygame.mixer.get_init():
+            pygame.mixer.music.set_volume(self.volume)
+    
+    def set_speed(self, val):
+        self.speed = float(val)
+        # Note: pygame doesn't natively support speed control
+        # This would require a more advanced audio library
+        self.status_bar.config(text=f"Speed set to: {self.speed:.1f}x")
+    
+    def prev_track(self):
+        if self.current_track > 0:
+            self.stop()
+            self.load_track(self.current_track - 1)
+            self.play()
+    
+    def next_track(self):
+        if self.current_track < len(self.audio_files) - 1:
+            self.stop()
+            self.load_track(self.current_track + 1)
+            self.play()
+    
+    def on_track_select(self, event):
+        selection = self.track_listbox.curselection()
+        if selection:
+            index = selection[0]
+            if index != self.current_track:
+                self.stop()
+                self.load_track(index)
+    
+    def update_time(self):
+        while self.playing and pygame.mixer.music.get_busy():
+            # Get current position and total length
+            # Note: pygame.mixer.music doesn't provide position info directly
+            # This is a simplified version
+            try:
+                pos = pygame.mixer.music.get_pos() / 1000  # Convert to seconds
+                if pos >= 0:
+                    mins, secs = divmod(int(pos), 60)
+                    self.time_label.config(text=f"{mins:02d}:{secs:02d}")
+            except:
+                pass
+            time.sleep(0.5)
+    
+    def on_closing(self):
+        self.stop()
+        pygame.mixer.quit()
+        self.root.destroy()
 
-else:
-    st.write("Vui lòng tải file lên server hoặc đặt vào thư mục chạy ứng dụng.")
+def main():
+    root = tk.Tk()
+    
+    # Set style
+    style = ttk.Style()
+    style.theme_use('clam')
+    
+    app = AudioPlayerApp(root)
+    root.protocol("WM_DELETE_WINDOW", app.on_closing)
+    root.mainloop()
 
+if __name__ == "__main__":
+    main()
