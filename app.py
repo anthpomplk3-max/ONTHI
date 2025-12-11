@@ -29,14 +29,17 @@ st.markdown("""
         margin: 10px 0;
         border-left: 5px solid #4CAF50;
         transition: all 0.3s;
+        cursor: pointer;
     }
     .track-card:hover {
         background-color: #e9ecef;
         transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     .active-track {
         border-left: 5px solid #2196F3;
         background-color: #e3f2fd;
+        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
     }
     .audio-controls {
         background-color: white;
@@ -67,6 +70,13 @@ st.markdown("""
         border-radius: 5px;
         margin-top: 10px;
     }
+    .slider-container {
+        margin: 10px 0;
+    }
+    .slider-value {
+        font-weight: bold;
+        color: #2196F3;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -81,8 +91,6 @@ TRACKS = [
 # Khởi tạo session state
 if 'current_track' not in st.session_state:
     st.session_state.current_track = 0
-if 'is_playing' not in st.session_state:
-    st.session_state.is_playing = False
 if 'volume' not in st.session_state:
     st.session_state.volume = 0.7
 if 'playback_speed' not in st.session_state:
@@ -115,7 +123,7 @@ def load_text_file(filename):
             # Thử decode với utf-8 và thay thế các ký tự lỗi
             return content.decode('utf-8', errors='replace')
     except Exception as e:
-        return f"Không thể đọc file: {filename}\nLỗi: {str(e)}\n\nVui lòng kiểm tra:\n1. File có tồn tại không?\n2. File có nội dung không?\n3. Encoding của file là gì?"
+        return f"Không thể đọc file: {filename}\nLỗi: {str(e)}"
 
 def get_audio_data_url(audio_file):
     """Chuyển đổi audio file thành data URL để phát"""
@@ -131,112 +139,205 @@ def get_audio_data_url(audio_file):
         st.error(f"Lỗi khi đọc file audio: {str(e)}")
         return None
 
-def display_audio_player():
-    """Hiển thị audio player với controls"""
-    current_audio = TRACKS[st.session_state.current_track]["audio"]
-    audio_url = get_audio_data_url(current_audio)
+def create_audio_player_with_controls(audio_url, track_name):
+    """Tạo audio player với controls tích hợp JavaScript"""
+    if not audio_url:
+        return ""
     
-    if audio_url:
-        # HTML audio player với JavaScript controls
-        audio_html = f"""
-        <div class="audio-controls">
-            <audio id="audioPlayer" controls style="width: 100%;" autoplay>
-                <source src="{audio_url}" type="audio/mpeg">
-                Trình duyệt của bạn không hỗ trợ phát audio.
-            </audio>
-            
-            <div style="margin-top: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <span>Âm lượng: {int(st.session_state.volume * 100)}%</span>
-                    <span>Tốc độ: {st.session_state.playback_speed}x</span>
-                </div>
-                
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <input type="range" id="volumeSlider" min="0" max="100" 
-                           value="{int(st.session_state.volume * 100)}" 
-                           style="flex-grow: 1;"
-                           oninput="updateVolume(this.value)">
-                    
-                    <input type="range" id="speedSlider" min="0.5" max="2.0" step="0.1"
-                           value="{st.session_state.playback_speed}" 
-                           style="flex-grow: 1;"
-                           oninput="updateSpeed(this.value)">
-                </div>
+    audio_player_html = f"""
+    <div class="audio-controls">
+        <audio id="audioPlayer" controls style="width: 100%;" onplay="audioPlaying()" onpause="audioPaused()" onended="audioEnded()">
+            <source src="{audio_url}" type="audio/mpeg">
+            Trình duyệt của bạn không hỗ trợ phát audio.
+        </audio>
+        
+        <div class="slider-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <span>Âm lượng:</span>
+                <span id="volumeValue" class="slider-value">70%</span>
             </div>
+            <input type="range" id="volumeSlider" min="0" max="100" value="70" 
+                   style="width: 100%;" oninput="updateVolume(this.value)">
         </div>
         
-        <script>
-            const audio = document.getElementById('audioPlayer');
-            
-            // Khởi tạo volume và playbackRate
+        <div class="slider-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <span>Tốc độ phát:</span>
+                <span id="speedValue" class="slider-value">1.0x</span>
+            </div>
+            <input type="range" id="speedSlider" min="0.5" max="2.0" step="0.1" value="1.0" 
+                   style="width: 100%;" oninput="updateSpeed(this.value)">
+        </div>
+    </div>
+    
+    <script>
+        const audio = document.getElementById('audioPlayer');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const speedSlider = document.getElementById('speedSlider');
+        const volumeValue = document.getElementById('volumeValue');
+        const speedValue = document.getElementById('speedValue');
+        
+        // Khởi tạo giá trị
+        function initAudioPlayer() {{
+            // Đặt volume ban đầu
             audio.volume = {st.session_state.volume};
+            volumeSlider.value = {st.session_state.volume * 100};
+            volumeValue.textContent = Math.round({st.session_state.volume * 100}) + '%';
+            
+            // Đặt tốc độ ban đầu
             audio.playbackRate = {st.session_state.playback_speed};
+            speedSlider.value = {st.session_state.playback_speed};
+            speedValue.textContent = {st.session_state.playback_speed} + 'x';
+        }}
+        
+        // Cập nhật volume
+        function updateVolume(value) {{
+            const volume = value / 100;
+            audio.volume = volume;
+            volumeValue.textContent = value + '%';
             
-            // Hàm cập nhật volume
-            function updateVolume(value) {{
-                audio.volume = value / 100;
-            }}
+            // Gửi giá trị volume về Streamlit
+            window.parent.postMessage({{
+                type: 'streamlit:setComponentValue',
+                value: {{volume: volume}}
+            }}, '*');
+        }}
+        
+        // Cập nhật tốc độ
+        function updateSpeed(value) {{
+            const speed = parseFloat(value);
+            audio.playbackRate = speed;
+            speedValue.textContent = speed.toFixed(1) + 'x';
             
-            // Hàm cập nhật tốc độ
-            function updateSpeed(value) {{
-                audio.playbackRate = parseFloat(value);
-            }}
-        </script>
-        """
-        st.components.v1.html(audio_html, height=150)
-    else:
-        st.error(f"Không thể tải file audio: {current_audio}")
-        st.info(f"Vui lòng đảm bảo file '{current_audio}' tồn tại trong thư mục hiện tại.")
+            // Gửi giá trị speed về Streamlit
+            window.parent.postMessage({{
+                type: 'streamlit:setComponentValue',
+                value: {{speed: speed}}
+            }}, '*');
+        }}
+        
+        // Xử lý sự kiện phát nhạc
+        function audioPlaying() {{
+            window.parent.postMessage({{
+                type: 'streamlit:setComponentValue',
+                value: {{playing: true}}
+            }}, '*');
+        }}
+        
+        function audioPaused() {{
+            window.parent.postMessage({{
+                type: 'streamlit:setComponentValue',
+                value: {{playing: false}}
+            }}, '*');
+        }}
+        
+        function audioEnded() {{
+            window.parent.postMessage({{
+                type: 'streamlit:setComponentValue',
+                value: {{ended: true}}
+            }}, '*');
+        }}
+        
+        // Khởi tạo khi trang tải xong
+        window.addEventListener('DOMContentLoaded', initAudioPlayer);
+        // Hoặc nếu trang đã tải xong
+        if (document.readyState === 'complete') {{
+            initAudioPlayer();
+        }}
+    </script>
+    """
+    
+    return audio_player_html
 
 def main():
     st.markdown('<h1 class="main-header">🎵 Audio Player with Text Sync</h1>', unsafe_allow_html=True)
     
-    # DEBUG: Hiển thị thông tin thư mục hiện tại
-    with st.expander("🔍 Debug Information"):
-        st.write("Current directory:", os.getcwd())
-        st.write("Files in directory:", os.listdir('.'))
-        
-        # Kiểm tra từng file
-        for track in TRACKS:
-            st.write(f"{track['audio']} exists:", os.path.exists(track['audio']))
-            st.write(f"{track['text']} exists:", os.path.exists(track['text']))
-            if os.path.exists(track['text']):
-                st.write(f"{track['text']} size:", os.path.getsize(track['text']), "bytes")
-    
-    # Sidebar cho danh sách track
+    # Kiểm tra file tồn tại
     with st.sidebar:
-        st.markdown("### 📋 Danh sách Track")
+        st.markdown("### 📂 Kiểm tra file")
         
-        for idx, track in enumerate(TRACKS):
-            is_active = idx == st.session_state.current_track
+        missing_files = []
+        existing_files = []
+        
+        for track in TRACKS:
             audio_exists = os.path.exists(track["audio"])
             text_exists = os.path.exists(track["text"])
             
-            card_class = "track-card"
-            if is_active:
-                card_class += " active-track"
-            
-            st.markdown(f'<div class="{card_class}">', unsafe_allow_html=True)
-            
-            col1, col2 = st.columns([3, 1])
-            with col1:
-                st.markdown(f"**Track {idx+1}**")
-                if audio_exists:
-                    st.markdown(f"✅ {track['audio']}")
-                else:
-                    st.markdown(f"❌ {track['audio']}")
+            if audio_exists and text_exists:
+                existing_files.append(f"✅ {track['audio']} và {track['text']}")
+            else:
+                if not audio_exists:
+                    missing_files.append(f"❌ {track['audio']}")
+                if not text_exists:
+                    missing_files.append(f"❌ {track['text']}")
+        
+        if missing_files:
+            st.error("### File bị thiếu:")
+            for file in missing_files:
+                st.text(file)
+        
+        if existing_files:
+            st.success("### File đã có:")
+            for file in existing_files:
+                st.text(file)
+    
+    # Sidebar cho danh sách track với highlight
+    with st.sidebar:
+        st.markdown("---")
+        st.markdown("### 📋 Danh sách Track")
+        
+        # Tạo container cho danh sách track
+        tracks_container = st.container()
+        
+        with tracks_container:
+            for idx, track in enumerate(TRACKS):
+                audio_exists = os.path.exists(track["audio"])
+                text_exists = os.path.exists(track["text"])
+                is_active = idx == st.session_state.current_track
                 
-                if text_exists:
-                    st.markdown(f"✅ {track['text']}")
-                else:
-                    st.markdown(f"❌ {track['text']}")
-            with col2:
-                if st.button("▶️", key=f"select_{idx}", help=f"Chọn track {idx+1}"):
-                    st.session_state.current_track = idx
-                    st.session_state.player_state = "playing"
-                    st.rerun()
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+                # Tạo cột cho mỗi track
+                col1, col2 = st.columns([4, 1])
+                
+                with col1:
+                    # Hiển thị track card với CSS
+                    card_class = "active-track" if is_active else ""
+                    st.markdown(f"""
+                    <div class="track-card {card_class}" onclick="selectTrack({idx})" style="cursor: pointer;">
+                        <strong>Track {idx+1}</strong><br>
+                        🎵 {track['audio']}<br>
+                        📄 {track['text']}
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with col2:
+                    # Nút chọn track
+                    if st.button("▶️", key=f"play_{idx}", help=f"Chơi track {idx+1}", 
+                                type="primary" if is_active else "secondary"):
+                        st.session_state.current_track = idx
+                        st.session_state.player_state = "playing"
+                        st.rerun()
+        
+        # JavaScript để xử lý click trên track card
+        st.markdown("""
+        <script>
+        function selectTrack(index) {
+            // Gửi thông điệp đến Streamlit để chọn track
+            window.parent.postMessage({
+                type: 'streamlit:setComponentValue',
+                value: {selectTrack: index}
+            }, '*');
+        }
+        
+        // Lắng nghe thông điệp từ Streamlit
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'streamlit:setComponentValue') {
+                if (event.data.value.hasOwnProperty('selectTrack')) {
+                    // Đã xử lý trong Python, không cần làm gì ở đây
+                }
+            }
+        });
+        </script>
+        """, unsafe_allow_html=True)
         
         # Thông tin hệ thống
         st.markdown("---")
@@ -246,64 +347,99 @@ def main():
         total_tracks = len(TRACKS)
         st.info(f"**Track hiện tại:** {current_track}/{total_tracks}")
         
-        # Thống kê file
-        audio_count = sum(1 for track in TRACKS if os.path.exists(track["audio"]))
-        text_count = sum(1 for track in TRACKS if os.path.exists(track["text"]))
-        st.metric("Audio files", f"{audio_count}/{len(TRACKS)}")
-        st.metric("Text files", f"{text_count}/{len(TRACKS)}")
+        # Hiển thị trạng thái player
+        status_display = {
+            "playing": "🟢 Đang phát",
+            "paused": "🟡 Tạm dừng", 
+            "stopped": "⚫ Dừng"
+        }
+        
+        current_status = status_display.get(st.session_state.player_state, "⚫ Không xác định")
+        st.markdown(f"**Trạng thái:** {current_status}")
+        
+        # Hiển thị thông số hiện tại
+        st.markdown(f"**Âm lượng:** {int(st.session_state.volume * 100)}%")
+        st.markdown(f"**Tốc độ:** {st.session_state.playback_speed:.1f}x")
     
     # Main content area
     col1, col2 = st.columns([1, 1])
     
     with col1:
-        st.markdown("### 🎚️ Điều khiển")
+        st.markdown("### 🎚️ Điều khiển phát nhạc")
         
         # Control buttons
-        col_btn1, col_btn2, col_btn3, col_btn4 = st.columns(4)
+        col_btn1, col_btn2, col_btn3, col_btn4, col_btn5 = st.columns(5)
         
         with col_btn1:
-            if st.button("⏮️ Trước", use_container_width=True, disabled=st.session_state.current_track == 0):
+            if st.button("⏮️", use_container_width=True, 
+                        disabled=st.session_state.current_track == 0,
+                        help="Track trước"):
                 if st.session_state.current_track > 0:
                     st.session_state.current_track -= 1
-                    st.session_state.player_state = "stopped"
+                    st.session_state.player_state = "playing"
                     st.rerun()
         
         with col_btn2:
-            if st.button("▶️ Phát", use_container_width=True, type="primary"):
-                st.session_state.player_state = "playing"
+            if st.button("⏯️", use_container_width=True, 
+                        type="primary" if st.session_state.player_state == "playing" else "secondary",
+                        help="Phát/Tạm dừng"):
+                if st.session_state.player_state == "playing":
+                    st.session_state.player_state = "paused"
+                else:
+                    st.session_state.player_state = "playing"
                 st.rerun()
         
         with col_btn3:
-            if st.button("⏸️ Tạm dừng", use_container_width=True):
-                st.session_state.player_state = "paused"
+            if st.button("⏹️", use_container_width=True, help="Dừng"):
+                st.session_state.player_state = "stopped"
                 st.rerun()
         
         with col_btn4:
-            if st.button("⏹️ Dừng", use_container_width=True):
-                st.session_state.player_state = "stopped"
+            if st.button("⏭️", use_container_width=True,
+                        disabled=st.session_state.current_track == len(TRACKS) - 1,
+                        help="Track tiếp"):
+                if st.session_state.current_track < len(TRACKS) - 1:
+                    st.session_state.current_track += 1
+                    st.session_state.player_state = "playing"
+                    st.rerun()
+        
+        with col_btn5:
+            if st.button("🔄", use_container_width=True, help="Làm mới"):
                 st.rerun()
         
-        # Next button
-        if st.button("⏭️ Tiếp", use_container_width=True, 
-                    disabled=st.session_state.current_track == len(TRACKS) - 1):
-            if st.session_state.current_track < len(TRACKS) - 1:
-                st.session_state.current_track += 1
-                st.session_state.player_state = "stopped"
-                st.rerun()
-        
-        # Hiển thị audio player
+        # Hiển thị audio player với controls
         st.markdown("### 🔊 Audio Player")
-        display_audio_player()
+        current_audio = TRACKS[st.session_state.current_track]["audio"]
+        audio_url = get_audio_data_url(current_audio)
+        
+        if audio_url:
+            audio_player_html = create_audio_player_with_controls(audio_url, current_audio)
+            st.components.v1.html(audio_player_html, height=200)
+        else:
+            st.error(f"Không thể tải file audio: {current_audio}")
+        
+        # Thanh tiến độ mô phỏng
+        if st.session_state.player_state == "playing":
+            progress_text = "Đang phát..."
+            progress_value = 0.5  # Giá trị mô phỏng
+        elif st.session_state.player_state == "paused":
+            progress_text = "Tạm dừng"
+            progress_value = st.session_state.track_progress / 100
+        else:
+            progress_text = "Dừng"
+            progress_value = 0
+        
+        st.progress(progress_value, text=progress_text)
         
         # Thông tin track hiện tại
         current_track_info = TRACKS[st.session_state.current_track]
         st.markdown(f"""
         <div class="status-bar">
-            <strong>Track hiện tại:</strong> {current_track}. {current_track_info['audio']}<br>
-            <strong>File text:</strong> {current_track_info['text']}<br>
-            <strong>Trạng thái:</strong> {st.session_state.player_state} | 
-            <strong>Âm lượng:</strong> {int(st.session_state.volume * 100)}% | 
-            <strong>Tốc độ:</strong> {st.session_state.playback_speed}x
+            <strong>🎵 Track hiện tại:</strong> {current_track}. {current_track_info['audio']}<br>
+            <strong>📄 File text:</strong> {current_track_info['text']}<br>
+            <strong>📊 Trạng thái:</strong> {st.session_state.player_state}<br>
+            <strong>🔊 Âm lượng:</strong> {int(st.session_state.volume * 100)}% | 
+            <strong>⚡ Tốc độ:</strong> {st.session_state.playback_speed:.1f}x
         </div>
         """, unsafe_allow_html=True)
     
@@ -316,14 +452,21 @@ def main():
         if os.path.exists(current_text_file):
             # Hiển thị thông tin file
             file_size = os.path.getsize(current_text_file)
-            st.caption(f"File: {current_text_file} ({file_size} bytes)")
             
             # Đọc và hiển thị nội dung
             text_content = load_text_file(current_text_file)
             
             if text_content:
-                # Hiển thị trong text area với thanh cuộn
-                st.markdown(f'<div class="text-display">{text_content}</div>', unsafe_allow_html=True)
+                # Tạo text area với highlight cho track đang chọn
+                text_display_html = f"""
+                <div style="background-color: #e3f2fd; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                    <strong>📁 File:</strong> {current_text_file} | <strong>📏 Kích thước:</strong> {file_size} bytes
+                </div>
+                <div class="text-display">
+                    {text_content}
+                </div>
+                """
+                st.markdown(text_display_html, unsafe_allow_html=True)
                 
                 # Nút download
                 with open(current_text_file, "rb") as f:
@@ -340,14 +483,9 @@ def main():
                 words = text_content.split()
                 chars = len(text_content)
                 
-                st.caption(f"Thống kê: {len(lines)} dòng, {len(words)} từ, {chars} ký tự")
+                st.caption(f"📊 Thống kê: {len(lines)} dòng, {len(words)} từ, {chars} ký tự")
             else:
                 st.warning("File text tồn tại nhưng không có nội dung hoặc không thể đọc.")
-                
-                # Hiển thị raw content
-                with open(current_text_file, 'rb') as f:
-                    raw_content = f.read()
-                st.code(f"Raw content (hex):\n{raw_content.hex()[:200]}...")
         else:
             st.error(f"❌ File text không tồn tại: {current_text_file}")
             
@@ -376,26 +514,44 @@ Thời gian: {time.strftime('%Y-%m-%d %H:%M:%S')}
                 except Exception as e:
                     st.error(f"Lỗi khi tạo file: {str(e)}")
     
-    # Hướng dẫn sử dụng và xử lý sự cố
-    with st.expander("ℹ️ Hướng dẫn sử dụng & Xử lý sự cố"):
+    # Xử lý messages từ JavaScript
+    try:
+        # Giả lập xử lý messages từ JavaScript
+        # Trong thực tế, bạn có thể sử dụng streamlit.components để xử lý thông điệp thực
+        pass
+    except:
+        pass
+    
+    # Hướng dẫn sử dụng
+    with st.expander("📖 Hướng dẫn sử dụng chi tiết"):
         st.markdown("""
-        ### Các bước sử dụng:
-        1. **Chọn track** từ danh sách bên trái
-        2. **Điều khiển phát nhạc** bằng các nút: Phát, Tạm dừng, Dừng
-        3. **Chuyển track** bằng nút Trước/Tiếp
-        4. **Điều chỉnh âm lượng** bằng thanh trượt trong audio player
-        5. **Điều chỉnh tốc độ phát** bằng thanh trượt tốc độ
-        6. **Xem nội dung text** tương ứng với track hiện tại
+        ### 🎯 Cách sử dụng:
         
-        ### Nếu không thấy nội dung text:
-        1. **Kiểm tra file có tồn tại không** - xem phần Debug Information
-        2. **Kiểm tra encoding của file** - thử mở bằng Notepad++ hoặc VS Code
-        3. **Tạo file mẫu** bằng nút "Tạo file text mẫu"
-        4. **Kiểm tra quyền truy cập** - đảm bảo ứng dụng có quyền đọc file
+        1. **Chọn track**: 
+           - Nhấp vào card track trong danh sách bên trái
+           - Hoặc sử dụng nút ▶️ trên mỗi track
+           - Track đang chọn sẽ được highlight màu xanh
         
-        ### Định dạng file hỗ trợ:
-        - **Audio**: MP3, WAV
-        - **Text**: UTF-8, UTF-8-SIG, Latin-1, CP1258, ISO-8859-1
+        2. **Điều khiển phát nhạc**:
+           - ⏮️: Chuyển đến track trước
+           - ⏯️: Phát/Tạm dừng track hiện tại
+           - ⏹️: Dừng phát nhạc
+           - ⏭️: Chuyển đến track tiếp theo
+        
+        3. **Điều chỉnh audio**:
+           - Sử dụng thanh trượt "Âm lượng" để điều chỉnh âm thanh
+           - Sử dụng thanh trượt "Tốc độ phát" để thay đổi tốc độ (0.5x - 2.0x)
+           - Giá trị sẽ hiển thị ngay khi bạn kéo thanh trượt
+        
+        4. **Xem nội dung text**:
+           - Nội dung file text tương ứng sẽ hiển thị bên phải
+           - Có thể tải xuống file text bằng nút "Tải xuống"
+        
+        ### 🔧 Xử lý sự cố:
+        
+        - **Không nghe được âm thanh**: Kiểm tra xem file audio có tồn tại không
+        - **Không thấy nội dung text**: Kiểm tra xem file text có tồn tại không
+        - **Thanh trượt không hoạt động**: Thử làm mới trang bằng nút 🔄
         """)
 
 if __name__ == "__main__":
