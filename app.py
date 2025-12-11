@@ -54,6 +54,9 @@ st.markdown("""
         overflow-y: auto;
         font-size: 16px;
         line-height: 1.6;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-family: 'Courier New', monospace;
     }
     .control-button {
         margin: 5px;
@@ -90,15 +93,29 @@ if 'track_progress' not in st.session_state:
     st.session_state.track_progress = 0
 
 def load_text_file(filename):
-    """Load nội dung file text"""
+    """Load nội dung file text với multiple encoding fallback"""
+    encodings = ['utf-8', 'utf-8-sig', 'latin-1', 'cp1258', 'iso-8859-1']
+    
+    for encoding in encodings:
+        try:
+            if os.path.exists(filename):
+                with open(filename, 'r', encoding=encoding) as f:
+                    content = f.read()
+                return content
+        except UnicodeDecodeError:
+            continue
+        except Exception as e:
+            continue
+    
+    # Nếu không đọc được với các encoding trên, thử đọc binary
     try:
         if os.path.exists(filename):
-            with open(filename, 'r', encoding='utf-8') as f:
-                return f.read()
-        else:
-            return f"Không tìm thấy file: {filename}\n\nVui lòng tạo file {filename} trong cùng thư mục với app.py và thêm nội dung văn bản vào."
+            with open(filename, 'rb') as f:
+                content = f.read()
+            # Thử decode với utf-8 và thay thế các ký tự lỗi
+            return content.decode('utf-8', errors='replace')
     except Exception as e:
-        return f"Lỗi khi đọc file: {str(e)}"
+        return f"Không thể đọc file: {filename}\nLỗi: {str(e)}\n\nVui lòng kiểm tra:\n1. File có tồn tại không?\n2. File có nội dung không?\n3. Encoding của file là gì?"
 
 def get_audio_data_url(audio_file):
     """Chuyển đổi audio file thành data URL để phát"""
@@ -158,48 +175,12 @@ def display_audio_player():
             // Hàm cập nhật volume
             function updateVolume(value) {{
                 audio.volume = value / 100;
-                // Gửi giá trị volume về Streamlit
-                window.parent.postMessage({{
-                    type: 'streamlit:setComponentValue',
-                    value: {{volume: value/100}}
-                }}, '*');
             }}
             
             // Hàm cập nhật tốc độ
             function updateSpeed(value) {{
                 audio.playbackRate = parseFloat(value);
-                // Gửi giá trị speed về Streamlit
-                window.parent.postMessage({{
-                    type: 'streamlit:setComponentValue',
-                    value: {{speed: parseFloat(value)}}
-                }}, '*');
             }}
-            
-            // Theo dõi trạng thái phát
-            audio.addEventListener('play', function() {{
-                window.parent.postMessage({{
-                    type: 'streamlit:setComponentValue',
-                    value: {{playing: true}}
-                }}, '*');
-            }});
-            
-            audio.addEventListener('pause', function() {{
-                window.parent.postMessage({{
-                    type: 'streamlit:setComponentValue',
-                    value: {{playing: false}}
-                }}, '*');
-            }});
-            
-            // Cập nhật tiến độ
-            audio.addEventListener('timeupdate', function() {{
-                if (audio.duration) {{
-                    const progress = (audio.currentTime / audio.duration) * 100;
-                    window.parent.postMessage({{
-                        type: 'streamlit:setComponentValue',
-                        value: {{progress: progress}}
-                    }}, '*');
-                }}
-            }});
         </script>
         """
         st.components.v1.html(audio_html, height=150)
@@ -210,82 +191,66 @@ def display_audio_player():
 def main():
     st.markdown('<h1 class="main-header">🎵 Audio Player with Text Sync</h1>', unsafe_allow_html=True)
     
-    # Kiểm tra file tồn tại
-    st.sidebar.markdown("### 📂 Kiểm tra file")
-    
-    missing_files = []
-    existing_files = []
-    
-    for track in TRACKS:
-        audio_exists = os.path.exists(track["audio"])
-        text_exists = os.path.exists(track["text"])
+    # DEBUG: Hiển thị thông tin thư mục hiện tại
+    with st.expander("🔍 Debug Information"):
+        st.write("Current directory:", os.getcwd())
+        st.write("Files in directory:", os.listdir('.'))
         
-        if audio_exists and text_exists:
-            existing_files.append(f"✅ {track['audio']} và {track['text']}")
-        else:
-            if not audio_exists:
-                missing_files.append(f"❌ {track['audio']}")
-            if not text_exists:
-                missing_files.append(f"❌ {track['text']}")
-    
-    if missing_files:
-        st.sidebar.error("### File bị thiếu:")
-        for file in missing_files:
-            st.sidebar.text(file)
-    
-    if existing_files:
-        st.sidebar.success("### File đã có:")
-        for file in existing_files:
-            st.sidebar.text(file)
+        # Kiểm tra từng file
+        for track in TRACKS:
+            st.write(f"{track['audio']} exists:", os.path.exists(track['audio']))
+            st.write(f"{track['text']} exists:", os.path.exists(track['text']))
+            if os.path.exists(track['text']):
+                st.write(f"{track['text']} size:", os.path.getsize(track['text']), "bytes")
     
     # Sidebar cho danh sách track
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### 📋 Danh sách Track")
-    
-    for idx, track in enumerate(TRACKS):
-        is_active = idx == st.session_state.current_track
-        audio_exists = os.path.exists(track["audio"])
-        text_exists = os.path.exists(track["text"])
+    with st.sidebar:
+        st.markdown("### 📋 Danh sách Track")
         
-        # Kiểm tra nếu cả hai file đều tồn tại
-        if audio_exists and text_exists:
-            card_class = "track-card active-track" if is_active else "track-card"
+        for idx, track in enumerate(TRACKS):
+            is_active = idx == st.session_state.current_track
+            audio_exists = os.path.exists(track["audio"])
+            text_exists = os.path.exists(track["text"])
             
-            st.sidebar.markdown(f'<div class="{card_class}">', unsafe_allow_html=True)
+            card_class = "track-card"
+            if is_active:
+                card_class += " active-track"
             
-            col1, col2 = st.sidebar.columns([3, 1])
+            st.markdown(f'<div class="{card_class}">', unsafe_allow_html=True)
+            
+            col1, col2 = st.columns([3, 1])
             with col1:
-                st.sidebar.markdown(f"**Track {idx+1}**")
-                st.sidebar.markdown(f"🎵 {track['audio']}")
-                st.sidebar.markdown(f"📄 {track['text']}")
+                st.markdown(f"**Track {idx+1}**")
+                if audio_exists:
+                    st.markdown(f"✅ {track['audio']}")
+                else:
+                    st.markdown(f"❌ {track['audio']}")
+                
+                if text_exists:
+                    st.markdown(f"✅ {track['text']}")
+                else:
+                    st.markdown(f"❌ {track['text']}")
             with col2:
-                if st.sidebar.button("▶️", key=f"select_{idx}", help=f"Chọn track {idx+1}"):
+                if st.button("▶️", key=f"select_{idx}", help=f"Chọn track {idx+1}"):
                     st.session_state.current_track = idx
                     st.session_state.player_state = "playing"
                     st.rerun()
             
-            st.sidebar.markdown('</div>', unsafe_allow_html=True)
-        else:
-            # Hiển thị thông báo nếu file không tồn tại
-            st.sidebar.warning(f"Track {idx+1}: File bị thiếu")
-    
-    # Thông tin hệ thống
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### ℹ️ Thông tin")
-    
-    current_track = st.session_state.current_track + 1
-    total_tracks = len(TRACKS)
-    st.sidebar.info(f"**Track hiện tại:** {current_track}/{total_tracks}")
-    
-    # Hiển thị trạng thái player
-    status_colors = {
-        "playing": "🟢",
-        "paused": "🟡", 
-        "stopped": "⚫"
-    }
-    
-    status_emoji = status_colors.get(st.session_state.player_state, "⚫")
-    st.sidebar.markdown(f"**Trạng thái:** {status_emoji} {st.session_state.player_state}")
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Thông tin hệ thống
+        st.markdown("---")
+        st.markdown("### ℹ️ Thông tin")
+        
+        current_track = st.session_state.current_track + 1
+        total_tracks = len(TRACKS)
+        st.info(f"**Track hiện tại:** {current_track}/{total_tracks}")
+        
+        # Thống kê file
+        audio_count = sum(1 for track in TRACKS if os.path.exists(track["audio"]))
+        text_count = sum(1 for track in TRACKS if os.path.exists(track["text"]))
+        st.metric("Audio files", f"{audio_count}/{len(TRACKS)}")
+        st.metric("Text files", f"{text_count}/{len(TRACKS)}")
     
     # Main content area
     col1, col2 = st.columns([1, 1])
@@ -330,15 +295,11 @@ def main():
         st.markdown("### 🔊 Audio Player")
         display_audio_player()
         
-        # Thanh tiến độ
-        progress_value = st.session_state.track_progress / 100 if st.session_state.track_progress <= 100 else 1.0
-        st.progress(progress_value, text=f"Tiến độ: {st.session_state.track_progress:.1f}%")
-        
         # Thông tin track hiện tại
         current_track_info = TRACKS[st.session_state.current_track]
         st.markdown(f"""
         <div class="status-bar">
-            <strong>Track hiện tại:</strong> {current_track + 1}. {current_track_info['audio']}<br>
+            <strong>Track hiện tại:</strong> {current_track}. {current_track_info['audio']}<br>
             <strong>File text:</strong> {current_track_info['text']}<br>
             <strong>Trạng thái:</strong> {st.session_state.player_state} | 
             <strong>Âm lượng:</strong> {int(st.session_state.volume * 100)}% | 
@@ -351,39 +312,49 @@ def main():
         
         # Load và hiển thị nội dung file text
         current_text_file = TRACKS[st.session_state.current_track]["text"]
-        text_content = load_text_file(current_text_file)
         
-        # Hiển thị với syntax highlighting nếu là code
-        if any(ext in current_text_file.lower() for ext in ['.py', '.js', '.java', '.cpp', '.c', '.html', '.css']):
-            st.code(text_content, language='python')
-        else:
-            st.markdown(f'<div class="text-display">{text_content}</div>', unsafe_allow_html=True)
-        
-        # Thông tin file
-        col_info1, col_info2 = st.columns([2, 1])
-        
-        with col_info1:
-            st.markdown(f"**File:** `{current_text_file}`")
-        
-        with col_info2:
-            # Download button cho file text
-            if os.path.exists(current_text_file):
-                with open(current_text_file, "r", encoding="utf-8") as f:
-                    text_data = f.read()
-                st.download_button(
-                    label="📥 Tải xuống",
-                    data=text_data,
-                    file_name=current_text_file,
-                    mime="text/plain",
-                    use_container_width=True
-                )
-        
-        if not os.path.exists(current_text_file):
-            st.warning(f"⚠️ File text không tồn tại: {current_text_file}")
+        if os.path.exists(current_text_file):
+            # Hiển thị thông tin file
+            file_size = os.path.getsize(current_text_file)
+            st.caption(f"File: {current_text_file} ({file_size} bytes)")
             
-            # Tạo file text mẫu nếu không tồn tại
-            if st.button("📝 Tạo file text mẫu", key="create_sample"):
-                sample_content = f"""Đây là nội dung mẫu cho file {current_text_file}
+            # Đọc và hiển thị nội dung
+            text_content = load_text_file(current_text_file)
+            
+            if text_content:
+                # Hiển thị trong text area với thanh cuộn
+                st.markdown(f'<div class="text-display">{text_content}</div>', unsafe_allow_html=True)
+                
+                # Nút download
+                with open(current_text_file, "rb") as f:
+                    st.download_button(
+                        label="📥 Tải xuống file text",
+                        data=f,
+                        file_name=current_text_file,
+                        mime="text/plain",
+                        use_container_width=True
+                    )
+                
+                # Thống kê nội dung
+                lines = text_content.split('\n')
+                words = text_content.split()
+                chars = len(text_content)
+                
+                st.caption(f"Thống kê: {len(lines)} dòng, {len(words)} từ, {chars} ký tự")
+            else:
+                st.warning("File text tồn tại nhưng không có nội dung hoặc không thể đọc.")
+                
+                # Hiển thị raw content
+                with open(current_text_file, 'rb') as f:
+                    raw_content = f.read()
+                st.code(f"Raw content (hex):\n{raw_content.hex()[:200]}...")
+        else:
+            st.error(f"❌ File text không tồn tại: {current_text_file}")
+            
+            # Tạo file text mẫu
+            st.info("Tạo file text mẫu để test:")
+            
+            sample_content = f"""Đây là nội dung mẫu cho file {current_text_file}
 
 Bạn có thể chỉnh sửa nội dung này hoặc thay thế bằng nội dung thực tế.
 
@@ -395,26 +366,36 @@ Các tính năng của ứng dụng:
 
 Thời gian: {time.strftime('%Y-%m-%d %H:%M:%S')}
 """
+            
+            if st.button("📝 Tạo file text mẫu", key="create_sample"):
                 try:
                     with open(current_text_file, 'w', encoding='utf-8') as f:
                         f.write(sample_content)
-                    st.success(f"Đã tạo file {current_text_file}")
+                    st.success(f"✅ Đã tạo file {current_text_file}")
                     st.rerun()
                 except Exception as e:
                     st.error(f"Lỗi khi tạo file: {str(e)}")
     
-    # Hướng dẫn sử dụng
-    with st.expander("ℹ️ Hướng dẫn sử dụng"):
+    # Hướng dẫn sử dụng và xử lý sự cố
+    with st.expander("ℹ️ Hướng dẫn sử dụng & Xử lý sự cố"):
         st.markdown("""
+        ### Các bước sử dụng:
         1. **Chọn track** từ danh sách bên trái
         2. **Điều khiển phát nhạc** bằng các nút: Phát, Tạm dừng, Dừng
         3. **Chuyển track** bằng nút Trước/Tiếp
         4. **Điều chỉnh âm lượng** bằng thanh trượt trong audio player
         5. **Điều chỉnh tốc độ phát** bằng thanh trượt tốc độ
         6. **Xem nội dung text** tương ứng với track hiện tại
-        7. **Tải xuống file text** nếu cần
         
-        **Lưu ý:** Ứng dụng yêu cầu cả file audio (.mp3) và file text (.txt) phải tồn tại trong cùng thư mục.
+        ### Nếu không thấy nội dung text:
+        1. **Kiểm tra file có tồn tại không** - xem phần Debug Information
+        2. **Kiểm tra encoding của file** - thử mở bằng Notepad++ hoặc VS Code
+        3. **Tạo file mẫu** bằng nút "Tạo file text mẫu"
+        4. **Kiểm tra quyền truy cập** - đảm bảo ứng dụng có quyền đọc file
+        
+        ### Định dạng file hỗ trợ:
+        - **Audio**: MP3, WAV
+        - **Text**: UTF-8, UTF-8-SIG, Latin-1, CP1258, ISO-8859-1
         """)
 
 if __name__ == "__main__":
