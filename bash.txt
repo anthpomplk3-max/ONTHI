@@ -1,0 +1,14 @@
+# Clone repository
+git clone https://github.com/username/repo.git
+cd repo
+
+# Tạo thư mục cho audio
+mkdir audio
+
+# Copy file âm thanh vào
+cp ~/Downloads/bai-hat.mp3 audio/
+
+# Thêm và commit
+git add audio/bai-hat.mp3
+git commit -m "Add audio file: bai-hat.mp3"
+git push origin main
