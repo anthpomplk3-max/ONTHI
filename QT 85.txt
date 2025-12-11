@@ -1,0 +1,64 @@
+QT 85:	ĐỊNH LƯỢNG HE4 (Human Epydidymal protein 4)
+
+
+I.	NGUYÊN LÝ
+HE4 là protein mào tinh người, nó là glycoprotein có trọng lượng phân tử 11 kD. Nồng độ HE4 tăng cao trong máu người bệnh ung thư buồng trứng.
+HE4 được định lượng bằng phương pháp miễn dịch sandwich sử dụng công nghệ hóa phát quang hay điện hóa phát quang. HE4 có trong mẫu thử đóng vai trò kháng nguyên được kẹp giữa hai kháng thể, kháng thể thứ nhất là kháng thể đơn dòng đặc hiệu kháng HE4 đánh dấu biotin, kháng thể thứ hai là kháng thể đơn dòng đặc hiệu kháng HE4 đánh dấu ruthenium (chất có khả năng phát quang) tạo thành phức hợp miễn dịch kiểu sandwich. Cường độ phát quang tỷ lệ thuận với nồng độ HE4 có trong mẫu thử.
+II.	CHUẨN BỊ
+1.	Người thực hiện
+01 cán bộ đại học, 01 kỹ thuật viên chuyên ngành hóa sinh
+2.	Phương tiện, hóa chất
+-	Phương tiện: Máy xét nghiệm như Cobas e411, e170. e601, rchitect….
+-	Hóa chất: Hóa chất xét nghiệm HE4, chất chuẩn HE4, chất kiểm tra chất lượng HE4.
+3.	Người bệnh
+Người bệnh cần được giải thích về mục đích của việc lấy máu để làm xét nghiệm. Không sử dụng các thuốc có chứa Biotin ít nhất 8 giờ trước khi lấy máu.
+4.	Phiếu xét nghiệm
+Phiếu xét nghiệm cần ghi đầy đủ thông tin về tên, tuổi, giới tính, khoa phòng, chẩn đoán của người bệnh và ghi rõ chỉ định xét nghiệm
+
+III.	CÁC BƯỚC TIẾN HÀNH
+1.	Lấy bệnh phẩm
+-	Lấy 3 ml máu tĩnh mạch vào ống không có chất chống đông hay ống có chất chống đông Li-Heparin, K2 và K3 EDT . Nếu bệnh phẩm được phân tích trên máy rchitect thì yêu cầu sử dụng huyết thanh.
+-	Sau khi lấy máu, đem ly tâm tách lấy huyết thanh hay huyết tương.
+-	Bệnh phẩm ổn định 5giờ ở 15 - 25°C, 48giờ ở 2-8°C, 3 tháng ở -20°C.
+-	Bệnh phẩm chỉ rã đông 1 lần và phải để bệnh phẩm đạt nhiệt độ phòng trước khi phân tích. Để tránh hiện tượng bay hơi, bệnh phẩm, chất chuẩn, chất kiểm tra chất lượng nên phân tích trong vòng 2giờ.
+2.	Tiến hành kỹ thuật
+-	Máy phân tích cần chuẩn bị sẵn sàng để thực hiện phân tích mẫu: Máy đã được cài đặt chương trình xét nghiệm HE4. Máy đã được chuẩn với xét nghiệm HE4. Kết quả kiểm tra chất lượng với xét nghiệm HE4 đạt yêu cầu không nằm ngoài dải cho phép và không vi phạm luật kiểm tra chất lượng.
+-	Người thực hiện phân tích mẫu nhập dữ liệu về thông tin người bệnh và chỉ định xét nghiệm vào máy phân tích hoặc hệ thống mạng (nếu có).
+-	Nạp mẫu bệnh phẩm vào máy phân tích
+-	Ra lệnh cho máy thực hiện phân tích mẫu bệnh phẩm
+-	Đợi máy phân tích mẫu theo protocol của máy
+-	Khi có kết quả cần xem xét đánh giá kết quả sau đó in báo cáo hoặc ghi kết quả vào phiếu xét nghiệm để trả cho người bệnh.
+
+IV.	NHẬN ĐỊNH KẾT QUẢ
+Bình thường, ở phụ nữ HE4 có giá trị như sau:
+<40 tuổi: <60.5 pmol/L
+40 – 49 tuổi: <76.2 pmol/L
+50 – 59 tuổi: <74.3 pmol/L
+60 -69 tuổi: < 82.9 pmol/L
+>70 tuổi: < 104 pmol/L
+HE4 tăng trong ung thư buồng trứng và tăng sớm hơn C 125. HE4 cũng được sử dụng để theo dõi điều trị và là chỉ thị sớm và quan trọng trong sự tái phát của bệnh.
+Ngoài ra còn sử dụng giá trị HE4 và C 125 định lượng được để tinh PI (Chỉ số tiên đoán) và ROM (Xác suất tiên đoán) để phân tầng nguy cơ cho người bệnh.
+Tính PI theo công thức:
+Tiền mãn kinh: PI = -12.0 + 2.38*LN[HE4] + 0.0626*LN[CA125] 
+Sau mãn kinh: PI = -8.09 + 1.04*LN[HE4] + 0.732*LN[CA125]
+Trong đó, LN = Logarithm tự nhiên. Không sử dụng LOG = Log10. 
+Tính ROM theo công thức:
+ROMA (%) = exp(PI) / [1 + exp(PI)] * 100
+Trong đó, exp(PI) = ePI
+Lưu ý: Các công thức này được sử dụng để tính toán giá trị ROM với xét nghiệm Elecsys HE4 từ 28.8-3847 pmol/L và với xét nghiệm Elecsys C 125 II từ 6.42-5000 U/mL.
+Dựa trên giá trị ROM , phân tầng nguy cơ cho người bệnh như sau: Phụ nữ tiền mãn kinh
+Giá trị ROM ≥ 11.4 % = nguy cơ cao ung thư buồng trứng
+Giá trị ROM < 11.4 % = nguy cơ thấp ung thư biểu mô buồng trứng Phụ nữ sau mãn kinh
+Giá trị ROM ≥ 29.9 % = nguy cơ cao ung thư buồng trứng
+Giá trị ROM < 29.9 % = nguy cơ thấp ung thư biểu mô buồng trứng
+
+V.	NHỮNG SAI SÓT VÀ XỬ TRÍ
+-	Những yếu tố gây nhiễu cho kết quả xét nghiệm Kết quả xét nghiệm không bị ảnh hưởng khi:
++ Huyết thanh vàng: Bilirubin < 66 mg/dL hay 1130 µmol/L.
++ Tán huyết: Hemoglobin <1.0 g/dl.
++ Huyết thanh đục: Triglyceride < 2000 mg/dl.
++ Biotin <50 ng/ml. trường hợp người bệnh sử dụng Biotin với liều > 5 mg/ngày cần lấy máu xét nghiệm ít nhất 8h sau khi sử dụng Biotin lần cuối.
++ Không có hiệu ứng “high-dose hook” (Hiệu ứng mẫu bệnh phẩm có nồng độ cao) khi nồng độ sFlt-1 tới 40 000 pmol/L.
++ RF <1500 IU/mL
+-	Khắc phục: Có thể hòa loãng bệnh phẩm và thực hiện lại xét nghiệm sau đó nhân kết quả với độ hòa loãng (Trường hợp có hòa loãng tự động trên máy thì kết quả không cần nhân với độ hòa loãng do máy đã tự tính toán).
+
