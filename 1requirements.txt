@@ -1,20 +1,2 @@
-{
-  "audio_files": [
-    {
-      "filename": "song.mp3",
-      "duration": "03:45",
-      "sample_rate": "44100 Hz",
-      "bitrate": "320 kbps",
-      "channels": 2,
-      "format": "MP3",
-      "artist": "Tên nghệ sĩ",
-      "album": "Tên album",
-      "year": 2024,
-      "genre": ["Pop", "Electronic"],
-      "license": "CC-BY-4.0",
-      "description": "Mô tả chi tiết",
-      "transcript": "audio/transcripts/song.txt",
-      "waveform": "audio/waveforms/song.png"
-    }
-  ]
-}
+streamlit
+pydub
