@@ -1,0 +1,27 @@
+name: Audio Processing
+
+on: [push]
+
+jobs:
+  process-audio:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        lfs: true
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install audio tools
+      run: |
+        sudo apt-get install -y ffmpeg sox
+        pip install librosa pydub soundfile
+    
+    - name: Process audio files
+      run: |
+        python scripts/convert.py
+        python scripts/generate_waveforms.py
