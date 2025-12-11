@@ -1,0 +1,66 @@
+QT 83:	ĐỊNH LƯỢNG HbA1c (Hemoglobin A1c)
+
+I.	NGUYÊN LÝ
+Hemoglobin (Hb) là protein có cấu trúc bậc bốn hoàn chỉnh của hồng cầu. Hb có chức năng vận chuyển oxy từ phổi tới tổ chức và và CO2 từ tổ chức tới phổi. Nồng độ glucose của hồng cầu cũng tương đương với nồng độ glucose trong huyết tương của máu. Khi nồng độ glucose máu tăng cao hơn mức bình thường trong một khoảng thời gian đủ dài, glucose sẽ kết hợp với hemoglobin gọi là phản ứng glycosyl hoá  (hay Glycosylated Haemoglobin). Nhóm aldehyd tự do của phân tử glucose kết hợp với phân tử Hb của hồng cầu thông qua Valin (một amino acid ở phần cuối của chuỗi beta) tạo ra sản phẩm trung gian là   ldimin, sau đó   ldimin sẽ được chuyển thành    Hb 1c theo sự chuyển madori không đảo ngược. Đường đơn trong máu chủ yếu là glucose do vậy thành phần chủ yếu của Hb 1 là Hb  1c (70%). Do vậy Hb  1c có giá trị chuyên biệt hơn Hb  1a1, Hb  1a2, Hb  1b nói riêng và Hb  1 nói chung. Tình   trạng gắn kết này sẽ thể hiện trong suốt đời sống của hồng cầu.
+Nguyên lý định lượng HbA1c:
+Dựa trên nguyên lý sắc ký lỏng áp lực cao (HPLC) . 
+Gồm- Pha tĩnh: là chất rắn
+-	Pha động là chất lỏng di chuyển dưới tác động của áp suất cao.
+-	Mẫu phân tích: Được hòa tan trong pha động
+Dựa vào ái lực khác nhau giữa các chất cần xác định với pha tĩnh và pha động mà chúng được tách nhau ra nhờ thay đổi độ phân cực của dung môi pha động cùng với cột tách thích hợp việc định lượng được thực hiện nhờ phương pháp ngoại chuẩn (so sánh mẫu với mẫu thêm chuẩn đã biết hàm lượng trong cùng điệu kiện phân tích. Đây là phương pháp hữu hiệu trong định lượng các chất hữu cơ có nhiệt phân hủy thấp)
+II.	CHUẨN BỊ
+1.	Người thực hiện:
+01 cán bộ đại học chuyên ngành Hóa sinh và 01 kỹ thuật viên
+2.	Phương tiện, hóa chất
+2.1.	Phương tiện
+Một số máy phân tích Hb 1c tự động theo nguyên lý HPLC: máy Utral 2, máy D10, máy variant (Hoa kỳ sản xuất) và một số máy khác.
+2.2.	Hóa chất
+-	 Gồm: dung dịch 2 ; Dung dịch B; dung dịch pha loãng, dung dịch rửa, peek colum- HbA1c, fit, 2 micron, 5/pk cho GH,
+-	Vật liệu cho QC: gồm 2 mức: thấp và cao
+2.3.	Các dụng cụ tiêu hao khác
+-	Ống nghiệm có chất chống đông EDT 
+-	Găng tay
+-	Bông, cồn sát trùng, dây garo
+-	Bơm tiêm hoặc kim lấy máu
+3.	Người bệnh
+Cần giải thích cho người bệnh và người nhà về mục đích và ý nghĩa của xét nghiệm Người bệnh cần phối hợp để lấy máu theo đúng yêu cầu về thời gian và số lượng.
+4.	Phiếu xét nghiệm
+Có y lệnh của bác sỹ lâm sàng ghi trên phiếu xét nghiệm
+
+III.	CÁC BƯỚC TIẾN HÀNH
+1.	Lấy bệnh phẩm
+-	 Không có quy định nghiêm ngặt về thời điểm lấy máu (lúc no, lúc đói đều được).
+-	Lấy khoảng 2 mL máu toàn phần vào ống có chất chống đông EDT .
+-	Bảo quản máu để làm xét nghiệm đơn giản và được lâu (ở nhiệt độ 2- 8oC có thể bảo quản được một tuần).
+2.	Tiến hành kỹ thuật
+2.1.	Chuẩn bị máy phân tích
+Dựng đường chuẩn
+Phân tích QC: ở cả 2 level. Khi QC đạt, tiến hành phân tích mẫu.
+2.2.	Phân tích mẫu
+Mẫu máu toàn phần được trộn đều đặt vào Rack đựng bệnh phẩm. dùng mã vạch (barcode) hoặc đánh số (hoặc ID của người bệnh); vận hành theo protocol của máy và máy sẽ tự động phân tích
+
+IV.	NHẬN ĐỊNH KẾT QUẢ
+-	Giá trị bình thường của Hb 1C là 4- 6 % (tǎng khi > 6,5% ).
+-	Tỷ lệ tương đối giữa trị số Hb 1c, nồng độ glucose và Fructosamine máu
+
+HbA1c	Glucose máu	Fructosamine
+%	(mmol/L)	(µmol/L)
+4	3,3	141
+5	5,0	200
+6	6,7	258
+7	8,3	317
+8	10,0	375
+9	11,7	435
+10	13,3	494
+11	15,0	552
+12	16,7	611
+13	18,3	670
+14	20,0	729
+
+
+V.	NHỮNG SAI SÓT VÀ XỬ TRÍ
+-	Hb 1c có thể “tăng giả”
+PreHb 1c; HbF; Hội chứng ure máu cao (cơ chế: do Hb bị carbamyl hóa);…
+-	Hb 1c có thể “giảm giả”
+Các bệnh làm giảm đời sống HC: huyết tán (tan máu); Thiếu máu mạn hoặc cấp; Xuất huyết tiêu hoá, sau trích máu điều trị; Nhiễm sắc tố sắt; Hemoglobine bất thường (VD: HbH, HbS, HbD, HbE, HbC)…
+
