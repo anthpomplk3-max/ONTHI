@@ -1,0 +1,18 @@
+audio-project/
+├── audio/
+│   ├── raw/           # Bản gốc
+│   │   ├── recordings/
+│   │   └── interviews/
+│   ├── processed/     # Đã xử lý
+│   │   ├── normalized/
+│   │   └── trimmed/
+│   └── samples/       # Mẫu ngắn
+├── metadata/
+│   ├── tracks.json    # Metadata
+│   └── transcripts/   # Bản chép lời
+├── scripts/
+│   ├── convert.py     # Chuyển đổi định dạng
+│   └── analyze.py     # Phân tích âm thanh
+├── .gitattributes     # Git LFS config
+├── LICENSE
+└── README.md
