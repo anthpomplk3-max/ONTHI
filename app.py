@@ -146,7 +146,7 @@ def get_audio_data_url(audio_file):
         return None
 
 def create_audio_player():
-    """Tạo HTML audio player với controls đơn giản"""
+    """Tạo HTML audio player với controls"""
     current_audio = TRACKS[st.session_state.current_track]["audio"]
     audio_url = get_audio_data_url(current_audio)
     
@@ -159,7 +159,6 @@ def create_audio_player():
         </div>
         """
     
-    # Tạo HTML audio player đơn giản không có JavaScript phức tạp
     audio_player_html = f"""
     <div class="audio-controls">
         <audio id="audioPlayer" controls style="width: 100%;">
@@ -188,21 +187,6 @@ def create_audio_player():
                    oninput="document.getElementById('speedValue').textContent = parseFloat(this.value).toFixed(1) + 'x'; 
                             document.getElementById('audioPlayer').playbackRate = parseFloat(this.value);">
         </div>
-        
-        <div style="margin-top: 15px; display: flex; gap: 10px;">
-            <button onclick="document.getElementById('audioPlayer').play()" 
-                    style="flex:1; padding:10px; background:#4CAF50; color:white; border:none; border-radius:5px; cursor:pointer;">
-                ▶ Phát
-            </button>
-            <button onclick="document.getElementById('audioPlayer').pause()" 
-                    style="flex:1; padding:10px; background:#FF9800; color:white; border:none; border-radius:5px; cursor:pointer;">
-                ⏸ Tạm dừng
-            </button>
-            <button onclick="document.getElementById('audioPlayer').pause(); document.getElementById('audioPlayer').currentTime = 0;" 
-                    style="flex:1; padding:10px; background:#F44336; color:white; border:none; border-radius:5px; cursor:pointer;">
-                ⏹ Dừng
-            </button>
-        </div>
     </div>
     
     <script>
@@ -215,15 +199,6 @@ def create_audio_player():
                 
                 // Đặt tốc độ ban đầu
                 audio.playbackRate = {st.session_state.playback_speed};
-                
-                // Cập nhật trạng thái khi audio phát
-                audio.addEventListener('play', function() {{
-                    // Không cần xử lý phức tạp
-                }});
-                
-                audio.addEventListener('pause', function() {{
-                    // Không cần xử lý phức tạp
-                }});
             }}
         }});
     </script>
@@ -293,40 +268,9 @@ def main():
     col1, col2 = st.columns([1, 1])
     
     with col1:
-        st.markdown("### 🎛️ Điều khiển phát nhạc")
-        
-        # Control buttons - Sử dụng Streamlit buttons
-        col_btn1, col_btn2, col_btn3, col_btn4, col_btn5 = st.columns(5)
-        
-        with col_btn1:
-            if st.button("⏮️", key="btn_prev", use_container_width=True, 
-                        disabled=st.session_state.current_track == 0):
-                st.session_state.current_track = max(0, st.session_state.current_track - 1)
-                st.rerun()
-        
-        with col_btn2:
-            if st.button("▶️", key="btn_play", use_container_width=True, type="primary"):
-                # Không cần xử lý phức tạp, để HTML audio player tự xử lý
-                st.rerun()
-        
-        with col_btn3:
-            if st.button("⏸️", key="btn_pause", use_container_width=True):
-                # Không cần xử lý phức tạp, để HTML audio player tự xử lý
-                st.rerun()
-        
-        with col_btn4:
-            if st.button("⏹️", key="btn_stop", use_container_width=True):
-                # Không cần xử lý phức tạp, để HTML audio player tự xử lý
-                st.rerun()
-        
-        with col_btn5:
-            if st.button("⏭️", key="btn_next", use_container_width=True,
-                        disabled=st.session_state.current_track == len(TRACKS) - 1):
-                st.session_state.current_track = min(len(TRACKS) - 1, st.session_state.current_track + 1)
-                st.rerun()
+        st.markdown("### 📋 Chọn Track")
         
         # Track selection buttons
-        st.markdown("### 📋 Chọn Track")
         track_cols = st.columns(4)
         for idx in range(len(TRACKS)):
             with track_cols[idx]:
@@ -337,10 +281,25 @@ def main():
                     st.session_state.current_track = idx
                     st.rerun()
         
-        # Hiển thị audio player
+        # Navigation buttons (chỉ giữ Previous và Next)
+        col_nav1, col_nav2 = st.columns(2)
+        
+        with col_nav1:
+            if st.button("⏮️ Track trước", key="btn_prev", use_container_width=True, 
+                        disabled=st.session_state.current_track == 0):
+                st.session_state.current_track = max(0, st.session_state.current_track - 1)
+                st.rerun()
+        
+        with col_nav2:
+            if st.button("Track tiếp ⏭️", key="btn_next", use_container_width=True,
+                        disabled=st.session_state.current_track == len(TRACKS) - 1):
+                st.session_state.current_track = min(len(TRACKS) - 1, st.session_state.current_track + 1)
+                st.rerun()
+        
+        # Hiển thị audio player (với các controls tích hợp)
         st.markdown("### 🔊 Audio Player")
         audio_player_html = create_audio_player()
-        st.components.v1.html(audio_player_html, height=250)
+        st.components.v1.html(audio_player_html, height=200)
         
         # Thông tin track hiện tại
         current_track_info = TRACKS[st.session_state.current_track]
@@ -454,9 +413,7 @@ Thời gian: {time.strftime('%Y-%m-%d %H:%M:%S')}
            - Track đang chọn sẽ được highlight bằng màu xanh
         
         2. **Điều khiển phát nhạc**:
-           - Sử dụng nút ▶️ trong audio player để phát nhạc
-           - Sử dụng nút ⏸️ trong audio player để tạm dừng
-           - Sử dụng nút ⏹️ trong audio player để dừng
+           - Sử dụng nút play/pause/stop tích hợp trong audio player
            - Sử dụng nút ⏮️ và ⏭️ để chuyển track
         
         3. **Điều chỉnh audio**:
@@ -470,9 +427,9 @@ Thời gian: {time.strftime('%Y-%m-%d %H:%M:%S')}
         
         ### 🔧 Xử lý sự cố:
         
-        - **Nút không hoạt động**: Làm mới trang trình duyệt
         - **Không nghe được âm thanh**: Kiểm tra xem file audio có tồn tại không
         - **Không thấy nội dung text**: Kiểm tra xem file text có tồn tại không
+        - **Thanh trượt không hoạt động**: Làm mới trang trình duyệt
         """)
 
 if __name__ == "__main__":
