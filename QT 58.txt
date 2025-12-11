@@ -1,0 +1,61 @@
+QT 58:	ĐỊNH LƯỢNG CÁC CHẤT ĐIỆN GIẢI (NA+, K+, Cl-)
+
+I.	NGUYÊN LÝ
+Các chất điện giải liên quan đến rất nhiều các chuyển hóa quan trọng trong cơ thể. Na+, K+, Cl- là các ion quan trọng nhất và được sử dụng nhiều nhất. Chúng được cung cấp qua chế độ ăn, hấp thu ở dạ dày, ruột và được đào thải qua thận
+Các chất điện giải máu được định lượng theo phương pháp điện cực chọn lọc gián tiếp
+II.	CHUẨN BỊ
+1.	Người thực hiện: bác sỹ hoặc kỹ thuật viên được đào tạo chuyên ngành Hóa sinh
+2.	Phương tiện, hóa chất
+-	Máy móc: hệ thống máy sinh hóa
+-	Thuốc thử: sẵn sàng sử dụng. ISE reference, ISE Diluent, ISE Internal Standard. Bảo quản ở 2-80C đến khi hếthạn sử dụng, 8 tuần khi để trên máy phân tích.
+Các loại dung dịch hệ thống khác.
+-	Điện cực các loại
+-	Chuẩn
+-	Control: 2 mức
+-	Vật tư tiêu hao: ống lấy máu, kim tiêm, bông, cồn, găng tay …
+3.	Người bệnh: được giải thích trước khi thực hiện xét nghiệm, tốt nhất là nhịn ăn sáng và lấy máu vào buổi sáng.
+4.	Phiếu xét nghiệm: có đầy đủ thông tin về người bệnh bao gồm tên, tuổi, khoa phòng, chẩn đoán, tình trạng mẫu, tên BS chỉ định, các loại thuốc đã sử dụng (nếu có)…
+III.	CÁC BƯỚC TIẾN HÀNH
+1.	Lấy bệnh phẩm: bệnh phẩm phải được lấy đúng kỹ thuật vào ống tiêu chuẩn. Ly tâm trước khi tiến hành kỹ thuật. Có thể sử dụng huyết thanh hoặc huyết tương chống đông bằng heparin (không dùng chất chống đông là EDT , oxalate xitrat). Bảo quản  ở 2-80C trong vòng 14 ngày (Cl- được 7 ngày). Rã đông một lần.
+Để bệnh phẩm, chuẩn, control ở nhiệt độ phòng (20-250C) và lắc đều trước khi tiến hành XN.
+2.	Tiến hành kỹ thuật
+-	Máy móc, hóa chất đã được cài đặt và chuẩn trước khi thực hiện phân tích. Control nằm trong miền cho phép tùy thuộc vào kỹ thuật, thuốc thử của từng công ty. Thông thường chạy control 2 miền: bình thường và bất thường. Đối chiếu với luật về nội kiểm chất lượng nếu đạt thì tiến hành phân tích mẫu.
+-	Đưa bệnh phẩm vào phân tích theo protocol của máy. Khi có kết quả thì phân tích và đối chiếu với phiếu xét nghiệm và trả kết quả.
+IV.	NHẬN ĐỊNH KẾT QUẢ
+-	Bình thường:
+•	Na:	133 – 147 mmol/l
+•	K:	3.4 – 4.5 mmol/l
+•	Clo:	94 – 111 mmol/l
+-	Kali máu tăng trong:
+•	Suy thận. thiểu niệu, vô niệu...
+•	Nhiễm acid, thiếu insulin (hôn mê tiểu đường)...
+•	Dập cơ, bỏng nặng, tắc ruột cấp, suy tim, NMCT..
+-	Kali máu giảm trong
+•	Bệnh Westphal
+•	Cường vỏ thượng thận
+•	Nhiễm acid tiểu đường
+•	Bỏng
+•	Dùng thuốc lợi niệu.
+-	Na máu tăng trong:
+•	Tổn thương ống thận, suy thượng thận.
+•	Dùng thuốc lợi niệu...
+-	Na máu giảm:
+•	Viêm thận.
+•	Suy tim.
+•	Nhiễm trùng nặng có sốt.
+•	Xơ gan..
+-	Clo máu máu tăng trong:
+•	Ăn mặn, mất nước, tiêu chảy nặng, dò ruột...
+•	Suy thận cấp, viêm thận.
+•	Cường cận giáp
+•	Nhiễm kiềm hô hấp, nhiễm acid chuyển hoá.
+-	Clo máu giảm trong:
+•	Ăn nhạt.
+•	Bỏng nặng.
+•	Dùng thuốc lợi tiểu...
+V.	NHỮNG SAI SÓT VÀ XỬ TRÍ
+
+Nguyên nhân	Sai sót	Xử trí
+Bệnh phẩm lấy vào ống có chất chống  đông  EDT hoặc các loại chất chống đông khác có chứa Natri hoặc kali hoặc clo	Sai lệch kết quả	Không sử dụng các mẫu này
+Bệnh phẩm huyết tán	Kết quả Kali sai tùy mức độ	Không sử dụng mẫu này
+
