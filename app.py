@@ -1,9 +1,7 @@
 import streamlit as st
 import os
 import time
-from pathlib import Path
 import base64
-import json
 
 # Thiết lập trang Streamlit
 st.set_page_config(
@@ -63,11 +61,6 @@ st.markdown("""
         font-family: 'Courier New', monospace;
         border: 2px solid #2196F3;
     }
-    .text-highlight {
-        background-color: #fffacd;
-        padding: 2px 4px;
-        border-radius: 3px;
-    }
     .control-button {
         margin: 5px;
     }
@@ -88,21 +81,6 @@ st.markdown("""
         font-weight: bold;
         color: #2196F3;
         font-size: 1.1em;
-    }
-    .control-group {
-        display: flex;
-        justify-content: space-between;
-        margin: 15px 0;
-        gap: 10px;
-    }
-    .control-btn {
-        flex: 1;
-        padding: 12px;
-        font-size: 1.1em;
-    }
-    .track-list {
-        max-height: 400px;
-        overflow-y: auto;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -126,11 +104,9 @@ if 'player_state' not in st.session_state:
     st.session_state.player_state = "stopped"
 if 'audio_data_urls' not in st.session_state:
     st.session_state.audio_data_urls = {}
-if 'last_action' not in st.session_state:
-    st.session_state.last_action = None
 
 def load_text_file(filename):
-    """Load nội dung file text với multiple encoding fallback"""
+    """Load nội dung file text"""
     if not os.path.exists(filename):
         return f"File không tồn tại: {filename}"
     
@@ -170,7 +146,7 @@ def get_audio_data_url(audio_file):
         return None
 
 def create_audio_player():
-    """Tạo HTML audio player với controls"""
+    """Tạo HTML audio player với controls đơn giản"""
     current_audio = TRACKS[st.session_state.current_track]["audio"]
     audio_url = get_audio_data_url(current_audio)
     
@@ -183,6 +159,7 @@ def create_audio_player():
         </div>
         """
     
+    # Tạo HTML audio player đơn giản không có JavaScript phức tạp
     audio_player_html = f"""
     <div class="audio-controls">
         <audio id="audioPlayer" controls style="width: 100%;">
@@ -197,7 +174,8 @@ def create_audio_player():
             </div>
             <input type="range" id="volumeSlider" min="0" max="100" value="{st.session_state.volume}" 
                    style="width: 100%; height: 10px;" 
-                   oninput="document.getElementById('volumeValue').textContent = this.value + '%'; updateStreamlit('volume', this.value);">
+                   oninput="document.getElementById('volumeValue').textContent = this.value + '%'; 
+                            document.getElementById('audioPlayer').volume = this.value / 100;">
         </div>
         
         <div class="slider-container">
@@ -207,60 +185,46 @@ def create_audio_player():
             </div>
             <input type="range" id="speedSlider" min="0.5" max="2.0" step="0.1" value="{st.session_state.playback_speed}" 
                    style="width: 100%; height: 10px;" 
-                   oninput="document.getElementById('speedValue').textContent = parseFloat(this.value).toFixed(1) + 'x'; updateStreamlit('speed', this.value);">
+                   oninput="document.getElementById('speedValue').textContent = parseFloat(this.value).toFixed(1) + 'x'; 
+                            document.getElementById('audioPlayer').playbackRate = parseFloat(this.value);">
         </div>
         
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <button onclick="playAudio()" style="flex:1; padding:10px; background:#4CAF50; color:white; border:none; border-radius:5px; cursor:pointer;">▶ Phát</button>
-            <button onclick="pauseAudio()" style="flex:1; padding:10px; background:#FF9800; color:white; border:none; border-radius:5px; cursor:pointer;">⏸ Tạm dừng</button>
-            <button onclick="stopAudio()" style="flex:1; padding:10px; background:#F44336; color:white; border:none; border-radius:5px; cursor:pointer;">⏹ Dừng</button>
+        <div style="margin-top: 15px; display: flex; gap: 10px;">
+            <button onclick="document.getElementById('audioPlayer').play()" 
+                    style="flex:1; padding:10px; background:#4CAF50; color:white; border:none; border-radius:5px; cursor:pointer;">
+                ▶ Phát
+            </button>
+            <button onclick="document.getElementById('audioPlayer').pause()" 
+                    style="flex:1; padding:10px; background:#FF9800; color:white; border:none; border-radius:5px; cursor:pointer;">
+                ⏸ Tạm dừng
+            </button>
+            <button onclick="document.getElementById('audioPlayer').pause(); document.getElementById('audioPlayer').currentTime = 0;" 
+                    style="flex:1; padding:10px; background:#F44336; color:white; border:none; border-radius:5px; cursor:pointer;">
+                ⏹ Dừng
+            </button>
         </div>
     </div>
     
     <script>
-        const audio = document.getElementById('audioPlayer');
-        
-        function updateStreamlit(key, value) {{
-            // Lưu giá trị vào localStorage để Streamlit có thể đọc
-            localStorage.setItem('streamlit_{key}', value);
-            
-            // Gửi sự kiện đến Streamlit (nếu được hỗ trợ)
-            if (window.parent && window.parent.streamlit) {{
-                window.parent.streamlit.setComponentValue({{'{key}': value}});
+        // Khởi tạo giá trị khi trang tải xong
+        window.addEventListener('DOMContentLoaded', function() {{
+            const audio = document.getElementById('audioPlayer');
+            if (audio) {{
+                // Đặt volume ban đầu
+                audio.volume = {st.session_state.volume / 100};
+                
+                // Đặt tốc độ ban đầu
+                audio.playbackRate = {st.session_state.playback_speed};
+                
+                // Cập nhật trạng thái khi audio phát
+                audio.addEventListener('play', function() {{
+                    // Không cần xử lý phức tạp
+                }});
+                
+                audio.addEventListener('pause', function() {{
+                    // Không cần xử lý phức tạp
+                }});
             }}
-        }}
-        
-        function playAudio() {{
-            audio.play();
-            updateStreamlit('player_state', 'playing');
-        }}
-        
-        function pauseAudio() {{
-            audio.pause();
-            updateStreamlit('player_state', 'paused');
-        }}
-        
-        function stopAudio() {{
-            audio.pause();
-            audio.currentTime = 0;
-            updateStreamlit('player_state', 'stopped');
-        }}
-        
-        // Khởi tạo giá trị
-        audio.volume = {st.session_state.volume / 100};
-        audio.playbackRate = {st.session_state.playback_speed};
-        
-        // Lắng nghe sự kiện
-        audio.addEventListener('play', function() {{
-            updateStreamlit('player_state', 'playing');
-        }});
-        
-        audio.addEventListener('pause', function() {{
-            updateStreamlit('player_state', 'paused');
-        }});
-        
-        audio.addEventListener('ended', function() {{
-            updateStreamlit('player_state', 'stopped');
         }});
     </script>
     """
@@ -279,45 +243,51 @@ def main():
             
             col1, col2 = st.columns([3, 1])
             with col1:
-                st.write(f"**Track {idx+1}**")
-                if audio_exists:
-                    st.success(f"✅ {track['audio']}")
+                # Hiển thị trạng thái track với màu sắc
+                if audio_exists and text_exists:
+                    status_color = "✅"
                 else:
-                    st.error(f"❌ {track['audio']}")
+                    status_color = "❌"
+                
+                st.write(f"**Track {idx+1}** {status_color}")
+                
+                if audio_exists:
+                    st.success(f"🎵 {track['audio']}")
+                else:
+                    st.error(f"🎵 {track['audio']}")
                 
                 if text_exists:
-                    st.success(f"✅ {track['text']}")
+                    st.success(f"📄 {track['text']}")
                 else:
-                    st.error(f"❌ {track['text']}")
+                    st.error(f"📄 {track['text']}")
             
             with col2:
                 # Nút chọn track
-                if st.button("Chọn", key=f"sidebar_select_{idx}", use_container_width=True):
+                if st.button("Chọn", key=f"sidebar_select_{idx}", use_container_width=True,
+                           type="primary" if idx == st.session_state.current_track else "secondary"):
                     st.session_state.current_track = idx
-                    st.session_state.last_action = f"selected_track_{idx}"
                     st.rerun()
         
         st.markdown("---")
-        st.markdown("### 🎛️ Cài đặt")
+        st.markdown("### 🎛️ Cài đặt Audio")
         
         # Điều chỉnh volume bằng Streamlit slider
         new_volume = st.slider("Âm lượng", 0, 100, st.session_state.volume, key="volume_slider")
         if new_volume != st.session_state.volume:
             st.session_state.volume = new_volume
-            st.session_state.last_action = "volume_changed"
             st.rerun()
         
         # Điều chỉnh tốc độ bằng Streamlit slider
         new_speed = st.slider("Tốc độ phát", 0.5, 2.0, float(st.session_state.playback_speed), 0.1, key="speed_slider")
         if new_speed != st.session_state.playback_speed:
             st.session_state.playback_speed = new_speed
-            st.session_state.last_action = "speed_changed"
             st.rerun()
         
         st.markdown("---")
         st.markdown("### ℹ️ Thông tin")
-        st.info(f"**Track:** {st.session_state.current_track + 1}/{len(TRACKS)}")
-        st.info(f"**Trạng thái:** {st.session_state.player_state}")
+        st.info(f"**Track hiện tại:** {st.session_state.current_track + 1}/{len(TRACKS)}")
+        st.info(f"**Âm lượng:** {st.session_state.volume}%")
+        st.info(f"**Tốc độ:** {st.session_state.playback_speed:.1f}x")
     
     # Main content area
     col1, col2 = st.columns([1, 1])
@@ -332,37 +302,27 @@ def main():
             if st.button("⏮️", key="btn_prev", use_container_width=True, 
                         disabled=st.session_state.current_track == 0):
                 st.session_state.current_track = max(0, st.session_state.current_track - 1)
-                st.session_state.player_state = "playing"
-                st.session_state.last_action = "prev_track"
                 st.rerun()
         
         with col_btn2:
-            btn_text = "⏸️" if st.session_state.player_state == "playing" else "▶️"
-            if st.button(btn_text, key="btn_play_pause", use_container_width=True):
-                if st.session_state.player_state == "playing":
-                    st.session_state.player_state = "paused"
-                else:
-                    st.session_state.player_state = "playing"
-                st.session_state.last_action = "play_pause"
+            if st.button("▶️", key="btn_play", use_container_width=True, type="primary"):
+                # Không cần xử lý phức tạp, để HTML audio player tự xử lý
                 st.rerun()
         
         with col_btn3:
-            if st.button("⏹️", key="btn_stop", use_container_width=True):
-                st.session_state.player_state = "stopped"
-                st.session_state.last_action = "stop"
+            if st.button("⏸️", key="btn_pause", use_container_width=True):
+                # Không cần xử lý phức tạp, để HTML audio player tự xử lý
                 st.rerun()
         
         with col_btn4:
-            if st.button("⏭️", key="btn_next", use_container_width=True,
-                        disabled=st.session_state.current_track == len(TRACKS) - 1):
-                st.session_state.current_track = min(len(TRACKS) - 1, st.session_state.current_track + 1)
-                st.session_state.player_state = "playing"
-                st.session_state.last_action = "next_track"
+            if st.button("⏹️", key="btn_stop", use_container_width=True):
+                # Không cần xử lý phức tạp, để HTML audio player tự xử lý
                 st.rerun()
         
         with col_btn5:
-            if st.button("🔄", key="btn_refresh", use_container_width=True):
-                st.session_state.last_action = "refresh"
+            if st.button("⏭️", key="btn_next", use_container_width=True,
+                        disabled=st.session_state.current_track == len(TRACKS) - 1):
+                st.session_state.current_track = min(len(TRACKS) - 1, st.session_state.current_track + 1)
                 st.rerun()
         
         # Track selection buttons
@@ -375,8 +335,6 @@ def main():
                 if st.button(f"Track {idx+1}", key=f"track_btn_{idx}", 
                            type=btn_type, use_container_width=True):
                     st.session_state.current_track = idx
-                    st.session_state.player_state = "playing"
-                    st.session_state.last_action = f"track_selected_{idx}"
                     st.rerun()
         
         # Hiển thị audio player
@@ -397,9 +355,6 @@ def main():
                     <strong>🔊 Âm lượng:</strong> {st.session_state.volume}%<br>
                     <strong>⚡ Tốc độ:</strong> {st.session_state.playback_speed:.1f}x
                 </div>
-            </div>
-            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd;">
-                <strong>📊 Trạng thái:</strong> <span style="color: {'#4CAF50' if st.session_state.player_state == 'playing' else '#FF9800' if st.session_state.player_state == 'paused' else '#F44336'}">{st.session_state.player_state.upper()}</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -422,7 +377,7 @@ def main():
                         <h4 style="margin: 0; color: white;">📁 {current_text_file}</h4>
                         <p style="margin: 5px 0 0 0; font-size: 0.9em;">Kích thước: {file_size:,} bytes</p>
                     </div>
-                    <div style="background-color: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 20px;">
+                    <div style="background-color: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 20px; font-weight: bold;">
                         Track {st.session_state.current_track + 1}
                     </div>
                 </div>
@@ -499,15 +454,14 @@ Thời gian: {time.strftime('%Y-%m-%d %H:%M:%S')}
            - Track đang chọn sẽ được highlight bằng màu xanh
         
         2. **Điều khiển phát nhạc**:
-           - ⏮️: Chuyển đến track trước
-           - ▶️/⏸️: Phát/Tạm dừng track hiện tại
-           - ⏹️: Dừng phát nhạc
-           - ⏭️: Chuyển đến track tiếp theo
-           - 🔄: Làm mới trang
+           - Sử dụng nút ▶️ trong audio player để phát nhạc
+           - Sử dụng nút ⏸️ trong audio player để tạm dừng
+           - Sử dụng nút ⏹️ trong audio player để dừng
+           - Sử dụng nút ⏮️ và ⏭️ để chuyển track
         
         3. **Điều chỉnh audio**:
-           - Sử dụng thanh trượt "Âm lượng" trong sidebar hoặc trong audio player
-           - Sử dụng thanh trượt "Tốc độ phát" trong sidebar hoặc trong audio player
+           - Sử dụng thanh trượt "Âm lượng" trong audio player hoặc sidebar
+           - Sử dụng thanh trượt "Tốc độ phát" trong audio player hoặc sidebar
            - Giá trị sẽ được cập nhật ngay lập tức
         
         4. **Xem nội dung text**:
@@ -516,7 +470,7 @@ Thời gian: {time.strftime('%Y-%m-%d %H:%M:%S')}
         
         ### 🔧 Xử lý sự cố:
         
-        - **Nút không hoạt động**: Nhấp nút 🔄 để làm mới trang
+        - **Nút không hoạt động**: Làm mới trang trình duyệt
         - **Không nghe được âm thanh**: Kiểm tra xem file audio có tồn tại không
         - **Không thấy nội dung text**: Kiểm tra xem file text có tồn tại không
         """)
