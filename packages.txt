@@ -1,2 +1,3 @@
-# packages.txt
+# packages.txt (Cập nhật)
 ffmpeg
+libportaudio2 # Gói này thường hỗ trợ các tác vụ Audio/Sound
